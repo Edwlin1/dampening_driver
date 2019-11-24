@@ -13,6 +13,9 @@
 #include "linux/fs.h"
 #include "linux/miscdevice.h"
 
+/* Defines ---------------------------------------------------------------- */
+#define RET_SUCCESS 0
+
 int dampening_driver_init(void);
 void dampening_driver_exit(void);
 

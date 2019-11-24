@@ -11,4 +11,14 @@
 #define __init
 #define __exit
 
+#define module_init(x)
+#define module_exit(x)
+
+#define MODULE_LICENSE(x)
+#define MODULE_AUTHOR(x)
+#define MODULE_DESCRIPTION(x)
+
+void pr_info(char*, ...);
+
+
 #endif /* TEST_SUPPORT_LINUX_MODULE_H_ */
