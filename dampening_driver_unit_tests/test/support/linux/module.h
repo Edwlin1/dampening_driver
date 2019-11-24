@@ -20,6 +20,8 @@
 
 #include <x86_64-linux-gnu/sys/types.h>
 
+#define container_of()
+
 void pr_info(char*, ...);
 
 

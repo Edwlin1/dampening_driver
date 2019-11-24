@@ -8,11 +8,14 @@
 #ifndef TEST_SUPPORT_LINUX_MISCDEVICE_H_
 #define TEST_SUPPORT_LINUX_MISCDEVICE_H_
 
+#include "linux/fs.h"
+
 #define MISC_DYNAMIC_MINOR 0
 
 struct miscdevice {
 	int 	minor;
 	char*  	name;
+	const struct file_operations* fops;
 };
 
 typedef struct miscdevice miscdevice_t;

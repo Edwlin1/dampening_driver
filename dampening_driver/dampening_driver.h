@@ -41,7 +41,8 @@ void dampening_driver_exit(void);
  * @offset Offset for data in file
  * @return Returns the amount of data remaining to be transferred. Zero if all data is transferred, negative on error.
  */
-int dampening_driver_write(struct file *file, char __user *user_buffer, size_t size, loff_t *offset);
-int dampening_driver_read(struct file *file, char __user *user_buffer, size_t size, loff_t *offset);
+
+ssize_t dampening_driver_write(struct file *file, const char __user *user_buffer, size_t size, loff_t *offset);
+ssize_t dampening_driver_read(struct file *file, char __user *user_buffer, size_t size, loff_t *offset);
 
 #endif /* DAMPENING_DRIVER_H_ */
