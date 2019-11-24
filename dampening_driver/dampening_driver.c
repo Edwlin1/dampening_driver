@@ -16,9 +16,8 @@ static struct miscdevice miscdevice_handle = {
 
 /**
  * dampening_driver_init()
- * Sets up driver resources when inserted into kernel.
+ * Sets up driver resources when inserted into kernel. See kernel log for messages on failure point.
  * @return Returns RET_SUCCESS on success, otherwise the return value of the failing resource request.
- * See kernel log for notes on failure point.
  */
 int __init dampening_driver_init(void)
 {

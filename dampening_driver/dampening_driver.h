@@ -12,6 +12,7 @@
 #include "linux/module.h"
 #include "linux/fs.h"
 #include "linux/miscdevice.h"
+#include "linux/uaccess.h"
 
 /* Defines ---------------------------------------------------------------- */
 #define RET_SUCCESS 0
@@ -19,6 +20,6 @@
 int dampening_driver_init(void);
 void dampening_driver_exit(void);
 
-//ssize_t write(struct file* file, const char __user* buff, size_t count, loff_t* ppos);
+int dampening_driver_write(struct file *file, char __user *user_buffer, size_t size, loff_t *offset);
 
 #endif /* DAMPENING_DRIVER_H_ */

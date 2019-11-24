@@ -18,6 +18,8 @@
 #define MODULE_AUTHOR(x)
 #define MODULE_DESCRIPTION(x)
 
+#include <x86_64-linux-gnu/sys/types.h>
+
 void pr_info(char*, ...);
 
 

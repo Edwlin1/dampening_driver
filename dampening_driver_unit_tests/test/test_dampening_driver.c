@@ -12,6 +12,7 @@
 #include "mock_module.h"
 #include "mock_miscdevice.h"
 #include "mock_fs.h"
+#include "mock_uaccess.h"
 
 /* Object under Test Includes --------------------------------------------- */
 #include "dampening_driver.h"
@@ -32,7 +33,7 @@ void tearDown(void)
 
 /* Test Cases ------------------------------------------------------------- */
 
-void test_module_init_succeeds(void)
+void test_dampening_driver_init_succeeds(void)
 {
 	misc_register_ExpectAndReturn(DUMMY_POINTER, RET_SUCCESS);
 	misc_register_IgnoreArg_device();
@@ -40,7 +41,7 @@ void test_module_init_succeeds(void)
 	TEST_ASSERT_EQUAL(RET_SUCCESS, dampening_driver_init());
 }
 
-void test_module_init_fails(void)
+void test_dampening_driver_init_fails(void)
 {
 	misc_register_ExpectAndReturn(DUMMY_POINTER, MISCDEVICE_ERR);
 	misc_register_IgnoreArg_device();
@@ -50,10 +51,26 @@ void test_module_init_fails(void)
 	TEST_ASSERT_EQUAL(MISCDEVICE_ERR, dampening_driver_init());
 }
 
-void test_module_exit(void)
+void test_dampening_driver_exit(void)
 {
 	misc_deregister_Expect(DUMMY_POINTER);
 	misc_deregister_IgnoreArg_device();
 
 	dampening_driver_exit();
 }
+
+void test_write_data_(void)
+{
+	const int data_size = 1;
+	copy_from_user_ExpectAndReturn(DUMMY_POINTER, DUMMY_POINTER, data_size, COPY_USER_SUCCESS);
+	copy_from_user_IgnoreArg_from();
+	copy_from_user_IgnoreArg_to();
+
+	loff_t offset;
+	struct file test_file;
+	char buffer[] = "Test";
+
+	TEST_ASSERT_EQUAL(sizeof(buffer), write(&test_file, buffer, sizeof(buffer), &offset));
+}
+
+
