@@ -14,11 +14,6 @@ static struct miscdevice miscdevice_handle = {
 		.name = "dampening_driver",
 };
 
-/**
- * dampening_driver_init()
- * Sets up driver resources when inserted into kernel. See kernel log for messages on failure point.
- * @return Returns RET_SUCCESS on success, otherwise the return value of the failing resource request.
- */
 int __init dampening_driver_init(void)
 {
 	int return_code = misc_register(&miscdevice_handle);
@@ -30,13 +25,19 @@ int __init dampening_driver_init(void)
 	return RET_SUCCESS;
 }
 
-/**
- * dampening_driver_exit()
- * Releases driver resources when removed from kernel.
- */
 void __exit dampening_driver_exit(void)
 {
 	misc_deregister(&miscdevice_handle);
+}
+
+int dampening_driver_write(struct file *file, char __user *user_buffer, size_t size, loff_t *offset)
+{
+	return -ENOENT;
+}
+
+int dampening_driver_read(struct file *file, char __user *user_buffer, size_t size, loff_t *offset)
+{
+	return -ENOENT;
 }
 
 module_init(dampening_driver_init);

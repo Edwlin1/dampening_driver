@@ -13,6 +13,7 @@
 #include "mock_miscdevice.h"
 #include "mock_fs.h"
 #include "mock_uaccess.h"
+#include "mock_errno.h"
 
 /* Object under Test Includes --------------------------------------------- */
 #include "dampening_driver.h"
@@ -59,7 +60,7 @@ void test_dampening_driver_exit(void)
 	dampening_driver_exit();
 }
 
-void test_write_data_(void)
+void test_dampening_driver_write_all_data_transferred(void)
 {
 	const int data_size = 1;
 	copy_from_user_ExpectAndReturn(DUMMY_POINTER, DUMMY_POINTER, data_size, COPY_USER_SUCCESS);
@@ -70,7 +71,21 @@ void test_write_data_(void)
 	struct file test_file;
 	char buffer[] = "Test";
 
-	TEST_ASSERT_EQUAL(sizeof(buffer), write(&test_file, buffer, sizeof(buffer), &offset));
+	TEST_ASSERT_EQUAL(sizeof(buffer), dampening_driver_write(&test_file, buffer, sizeof(buffer), &offset));
+}
+
+void test_dampening_driver_read_all_data_transferred(void)
+{
+	const int data_size = 1;
+	copy_to_user_ExpectAndReturn(DUMMY_POINTER, DUMMY_POINTER, data_size, COPY_USER_SUCCESS);
+	copy_to_user_IgnoreArg_from();
+	copy_to_user_IgnoreArg_to();
+
+	loff_t offset;
+	struct file test_file;
+	char buffer[] = "Test";
+
+	TEST_ASSERT_EQUAL(sizeof(buffer), dampening_driver_read(&test_file, buffer, sizeof(buffer), &offset));
 }
 
 
