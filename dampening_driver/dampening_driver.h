@@ -17,6 +17,16 @@
 
 /* Defines ---------------------------------------------------------------- */
 #define RET_SUCCESS 0
+#define AVERAGING_BUFFER_SIZE 128
+
+struct dampening_driver_data {
+	struct miscdevice miscdevice_handle;
+	char input_buffer[AVERAGING_BUFFER_SIZE];
+	char output_buffer[AVERAGING_BUFFER_SIZE];
+	unsigned int input_index;
+	unsigned int output_write_index;
+	unsigned int output_read_index;
+};
 
 /**
  * dampening_driver_init()

@@ -20,7 +20,9 @@
 
 #include <x86_64-linux-gnu/sys/types.h>
 
-#define container_of()
+#define container_of(container, type, member)  (type*) data_injector();
+
+void* data_injector();
 
 void pr_info(char*, ...);
 

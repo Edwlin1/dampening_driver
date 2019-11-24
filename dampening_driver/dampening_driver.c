@@ -10,21 +10,11 @@
 #include "linux/string.h"
 
 /* Private defines -------------------------------------------------------- */
-#define AVERAGING_BUFFER_SIZE 128
 
 /* Private variables ------------------------------------------------------ */
 static const struct file_operations file_operations_handle = {
 		.write = dampening_driver_write,
 		.read = dampening_driver_read,
-};
-
-struct dampening_driver_data {
-	struct miscdevice miscdevice_handle;
-	char input_buffer[AVERAGING_BUFFER_SIZE];
-	char output_buffer[AVERAGING_BUFFER_SIZE];
-	unsigned int input_index;
-	unsigned int output_write_index;
-	unsigned int output_read_index;
 };
 
 struct dampening_driver_data driver_data;
