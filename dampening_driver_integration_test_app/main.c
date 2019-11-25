@@ -44,7 +44,7 @@ int main (int argc, char** argv)
 			for(i = 0; i < read_bytes-1; i++) {
 				printf("%d, ", output_data[i]);
 			}
-			printf("%d\n", output_data[read_bytes]);
+			printf("%d\n", output_data[read_bytes-1]);
 		} else {
 			printf("Error: read returned illegal write size.\n");
 			return 0;

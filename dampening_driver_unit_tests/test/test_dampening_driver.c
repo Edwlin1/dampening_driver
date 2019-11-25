@@ -127,8 +127,7 @@ void test_dampening_driver_average_eight_bytes(void)
 	loff_t offset;
 	struct file test_file;
 	char input_data[8] = {10, 10, 50, 100, 100, 200, 100, 1};
-	//FIXME Use a completely defined target dampening_driver_data struct instead, containing correct values for
-	//indices etc.
+	//FIXME Use a completely defined target dampening_driver_data struct instead, containing correct values for indices etc.
 	char expected_output_data[8] = {10, 10, 23, 42, 54, 78, 81, 71};
 
 	struct dampening_driver_data test_state;
@@ -142,26 +141,14 @@ void test_dampening_driver_average_eight_bytes(void)
 
 	dampening_driver_write(&test_file, input_data, sizeof(input_data), &offset);
 
+	//FIXME Reads wrong data for some reason.
 	TEST_ASSERT_EQUAL_INT8_ARRAY(expected_output_data, test_state.output_buffer, sizeof(expected_output_data));
 }
 
 void test_dampening_driver_average_nine_bytes(void)
 {
-	loff_t offset;
-	struct file test_file;
-	char input_data[9] = {23};
-
-	struct dampening_driver_data test_state;
-	memset(&test_state, 0, sizeof(test_state));
-	data_injector_ExpectAndReturn(&test_state);
-
-	copy_from_user_ExpectAndReturn(DUMMY_POINTER, DUMMY_POINTER, 1, COPY_USER_SUCCESS);
-	copy_from_user_IgnoreArg_from();
-	copy_from_user_IgnoreArg_to();
-
-	dampening_driver_write(&test_file, input_data, sizeof(input_data), &offset);
-
-	TEST_ASSERT_EQUAL(test_state.output_buffer[0], input_data);
+	//TODO Implement test
+	TEST_ASSERT_EQUAL(0, 1);
 }
 
-//TODO Add unit tests for buffer overwrite, i.e. more than 128 bytes, multiple and single writes
+//TODO Add unit tests for buffer overwrite, i.e. more than 32 bytes, multiple and single writes
