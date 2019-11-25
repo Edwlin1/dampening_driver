@@ -102,4 +102,65 @@ void test_dampening_driver_read_all_data_transferred(void)
 	TEST_ASSERT_EQUAL(sizeof(actual_buffer), dampening_driver_read(&test_file, actual_buffer, sizeof(actual_buffer), &offset));
 }
 
+//TODO Add unit tests for failure of each copy_to_user/copy_from_user
 
+void test_dampening_driver_average_one_byte(void)
+{
+	loff_t offset;
+	struct file test_file;
+	char input_data[1] = {23};
+
+	struct dampening_driver_data test_state;
+	memset(&test_state, 0, sizeof(test_state));
+	data_injector_ExpectAndReturn(&test_state);
+
+	copy_from_user_ExpectAndReturn(DUMMY_POINTER, DUMMY_POINTER, 1, COPY_USER_SUCCESS);
+	copy_from_user_IgnoreArg_to();
+	copy_from_user_ReturnArrayThruPtr_to(input_data, sizeof(input_data));
+	copy_from_user_IgnoreArg_from();
+
+	dampening_driver_write(&test_file, input_data, sizeof(input_data), &offset);
+
+	TEST_ASSERT_EQUAL(test_state.output_buffer[0], input_data[0]);
+}
+
+void test_dampening_driver_average_eight_bytes(void)
+{
+	loff_t offset;
+	struct file test_file;
+	char input_data[1];
+	input_data[0] = 23;
+
+	struct dampening_driver_data test_state;
+	memset(&test_state, 0, sizeof(test_state));
+	data_injector_ExpectAndReturn(&test_state);
+
+	copy_from_user_ExpectAndReturn(DUMMY_POINTER, DUMMY_POINTER, 1, COPY_USER_SUCCESS);
+	copy_from_user_IgnoreArg_from();
+	copy_from_user_IgnoreArg_to();
+
+	dampening_driver_write(&test_file, input_data, sizeof(input_data), &offset);
+
+	TEST_ASSERT_EQUAL(test_state.output_buffer[0], input_data[0]);
+}
+
+void test_dampening_driver_average_nine_bytes(void)
+{
+	loff_t offset;
+	struct file test_file;
+	char input_data[9] = {23};
+
+	struct dampening_driver_data test_state;
+	memset(&test_state, 0, sizeof(test_state));
+	data_injector_ExpectAndReturn(&test_state);
+
+	copy_from_user_ExpectAndReturn(DUMMY_POINTER, DUMMY_POINTER, 1, COPY_USER_SUCCESS);
+	copy_from_user_IgnoreArg_from();
+	copy_from_user_IgnoreArg_to();
+
+	dampening_driver_write(&test_file, input_data, sizeof(input_data), &offset);
+
+	TEST_ASSERT_EQUAL(test_state.output_buffer[0], input_data);
+}
+
+//TODO Add unit tests for buffer overwrite, i.e. more than 128 bytes, multiple and single writes

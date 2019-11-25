@@ -18,6 +18,7 @@
 /* Defines ---------------------------------------------------------------- */
 #define RET_SUCCESS 0
 #define AVERAGING_BUFFER_SIZE 128
+#define AVERAGED_ELEMENTS 8
 
 struct dampening_driver_data {
 	struct miscdevice miscdevice_handle;
@@ -26,6 +27,7 @@ struct dampening_driver_data {
 	unsigned int input_index;
 	unsigned int output_write_index;
 	unsigned int output_read_index;
+	unsigned int current_sum;
 };
 
 /**
@@ -53,6 +55,8 @@ void dampening_driver_exit(void);
  */
 
 ssize_t dampening_driver_write(struct file *file, const char __user *user_buffer, size_t size, loff_t *offset);
+
+//TODO Add documentation
 ssize_t dampening_driver_read(struct file *file, char __user *user_buffer, size_t size, loff_t *offset);
 
 #endif /* DAMPENING_DRIVER_H_ */

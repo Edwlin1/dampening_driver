@@ -50,9 +50,21 @@ void __exit dampening_driver_exit(void)
 	misc_deregister(&driver_data.miscdevice_handle);
 }
 
+static inline int get_remove_element_index(unsigned int index) {
+	int adjusted_index = index - AVERAGED_ELEMENTS;
+	if(adjusted_index >= 0) {
+		return adjusted_index;
+	} else {
+		return AVERAGING_BUFFER_SIZE - adjusted_index;
+	}
+}
+
 ssize_t dampening_driver_write(struct file *file, const char __user *user_buffer, size_t size, loff_t *offset)
 {
+	//TODO Add buffer wraparound handling
+	int copied_data = 0;
 	struct dampening_driver_data* p_driver_data = container_of(file->private_data, struct dampening_driver_data, miscdevice_handle);
+	int calculation_index = p_driver_data->input_index;
 
 	int available_space = AVERAGING_BUFFER_SIZE - p_driver_data->input_index;
 	if(size < available_space) {
@@ -60,14 +72,49 @@ ssize_t dampening_driver_write(struct file *file, const char __user *user_buffer
 			return -EFAULT;
 		}
 		p_driver_data->input_index += size;
-		return size;
+		copied_data = size;
 	} else {
 		if(copy_from_user(&p_driver_data->input_buffer[p_driver_data->input_index], user_buffer, available_space) != 0) {
 			return -EFAULT;
 		}
 		p_driver_data->input_index = 0;
+		copied_data = available_space;
 	}
-	return available_space;
+
+	//TODO Rework to for-loop to avoid possibility of eternal loops?
+	while(calculation_index != p_driver_data->input_index) {
+		if(calculation_index > 8 || (p_driver_data->input_buffer[p_driver_data->input_index+1] != 0)) {
+
+			p_driver_data->current_sum = -p_driver_data->input_buffer[get_remove_element_index(calculation_index)]
+										 + p_driver_data->input_buffer[calculation_index];
+			//Divide by eight
+			p_driver_data->output_buffer[p_driver_data->output_write_index] = p_driver_data->current_sum >> 3;
+
+			p_driver_data->output_write_index++;
+			if(p_driver_data->output_write_index >= AVERAGING_BUFFER_SIZE)
+				p_driver_data->output_write_index = 0;
+
+			calculation_index++;
+			if(calculation_index >= AVERAGING_BUFFER_SIZE)
+				calculation_index = 0;
+
+		} else {
+			p_driver_data->current_sum += p_driver_data->input_buffer[calculation_index];
+			p_driver_data->output_buffer[p_driver_data->output_write_index] = p_driver_data->current_sum / (calculation_index+1);
+
+			p_driver_data->output_write_index++;
+			if(p_driver_data->output_write_index >= AVERAGING_BUFFER_SIZE) {
+				//This should not happen - since calculation_index is less than 8 - but avoid overflow and return an error
+				p_driver_data->output_write_index = 0;
+				//TODO Use better error code.
+				return -EINVAL;
+			}
+
+			calculation_index++;
+		}
+	}
+
+	return copied_data;
 }
 
 ssize_t dampening_driver_read(struct file *file, char __user *user_buffer, size_t size, loff_t *offset)
