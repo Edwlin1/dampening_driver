@@ -24,4 +24,11 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>dampening_driver</name>
+			<type>2</type>
+			<location>/home/edward/git/dampening_driver/dampening_driver</location>
+		</link>
+	</linkedResources>
 </projectDescription>
