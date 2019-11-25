@@ -86,6 +86,9 @@ ssize_t dampening_driver_write(struct file *file, const char __user *user_buffer
 
 	pr_info("DAMPENING_DRIVER: write called\n");
 
+	if(size == 0 || size > AVERAGING_BUFFER_SIZE)
+			return -EINVAL;
+
 	if(size < available_space) {
 		if(copy_from_user(&p_driver_data->input_buffer[p_driver_data->input_index], user_buffer, size) != 0) {
 			return -EFAULT;
@@ -181,17 +184,17 @@ ssize_t dampening_driver_read(struct file *file, char __user *user_buffer, size_
 
 		if(p_driver_data->output_write_index >=  p_driver_data->output_read_index) {
 
-			if(copy_to_user(&p_driver_data->output_buffer[p_driver_data->output_read_index], user_buffer, size) != 0)
+			if(copy_to_user(user_buffer, &p_driver_data->output_buffer[p_driver_data->output_read_index], size) != 0)
 				return -EFAULT;
 			p_driver_data->output_read_index += size;
 			return size;
 		} else {
 
 			int buffer_end_size = AVERAGING_BUFFER_SIZE - p_driver_data->output_read_index;
-			if(copy_to_user(&p_driver_data->output_buffer[p_driver_data->output_read_index], user_buffer, buffer_end_size) != 0)
+			if(copy_to_user( user_buffer, &p_driver_data->output_buffer[p_driver_data->output_read_index], buffer_end_size) != 0)
 				return -EFAULT;
 
-			if(copy_to_user(p_driver_data->output_buffer, user_buffer, size - (AVERAGING_BUFFER_SIZE - p_driver_data->output_read_index)) != 0)
+			if(copy_to_user(user_buffer, p_driver_data->output_buffer, size - (AVERAGING_BUFFER_SIZE - p_driver_data->output_read_index)) != 0)
 				return buffer_end_size;
 			p_driver_data->output_read_index += size;
 			return size;
