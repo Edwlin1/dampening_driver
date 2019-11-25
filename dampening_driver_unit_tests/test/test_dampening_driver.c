@@ -101,6 +101,7 @@ void test_dampening_driver_read_all_data_transferred(void)
 }
 
 //TODO Add unit tests for failure of each copy_to_user/copy_from_user
+//TODO Add unit tests for requests for more data than exists, more data than there is buffer space etc
 
 void test_dampening_driver_average_one_byte(void)
 {
@@ -151,4 +152,6 @@ void test_dampening_driver_average_nine_bytes(void)
 	TEST_ASSERT_EQUAL(0, 1);
 }
 
-//TODO Add unit tests for buffer overwrite, i.e. more than 32 bytes, multiple and single writes
+//TODO Add unit tests for buffer overwrite, i.e. more than 32 bytes, multiple and single write operations
+
+//TODO Add unit tests for read function, at least same operations as for write

@@ -11,6 +11,12 @@
 #include <errno.h>
 #include <string.h>
 
+#define TEST_DATA_SIZE 8
+
+//TODO Add documentation
+//TODO Break into read, write, init suboperations
+//TODO Implement testing based on commandline arguments - data size etc.
+//TODO Add automatic test suite (using google test?) mirroring tests in driver unit test project
 int main (int argc, char** argv)
 {
 	int dampening_driver_file = open("/dev/dampening_driver", O_RDWR);
@@ -20,7 +26,7 @@ int main (int argc, char** argv)
 		return 0;
 	}
 
-	char input_data[8] = {10, 10, 50, 100, 100, 200, 100, 1};
+	char input_data[TEST_DATA_SIZE] = {10, 10, 50, 100, 100, 200, 100, 1};
 	ssize_t written_bytes = write(dampening_driver_file, input_data, sizeof(input_data));
 
 	if(written_bytes < 0) {
@@ -29,7 +35,7 @@ int main (int argc, char** argv)
 		printf("Amount of data written: %li\n", written_bytes);
 	}
 
-	char output_data[8];
+	char output_data[TEST_DATA_SIZE];
 	memset(output_data, 0, sizeof(output_data));
 
 	ssize_t read_bytes = read(dampening_driver_file, output_data, sizeof(output_data));

@@ -9,8 +9,6 @@
 #include "dampening_driver.h"
 #include "linux/string.h"
 
-/* Private defines -------------------------------------------------------- */
-
 /* Private variables ------------------------------------------------------ */
 static const struct file_operations file_operations_handle = {
 		.open = dampening_driver_open,
@@ -42,27 +40,23 @@ int __init dampening_driver_init(void)
 	memset(driver_data.input_buffer, 0, sizeof(driver_data.input_buffer));
 	memset(driver_data.output_buffer, 0, sizeof(driver_data.output_buffer));
 
-	pr_info("DAMPENING_DRIVER: started\n");
-
 	return RET_SUCCESS;
 }
 
 void __exit dampening_driver_exit(void)
 {
 	misc_deregister(&driver_data.miscdevice_handle);
-
-	pr_info("DAMPENING_DRIVER: exited\n");
 }
 
 int dampening_driver_open(struct inode* inode, struct file* file)
 {
-	pr_info("DAMPENING_DRIVER: open called\n");
+	//TODO Implement control to block multiple processes from accessing. Semaphore or something similar?
 	return RET_SUCCESS;
 }
 
 int dampening_driver_release(struct inode* inode, struct file* file)
 {
-	pr_info("DAMPENING_DRIVER: close called\n");
+	//TODO Implement control to block multiple processes from accessing.
 	return RET_SUCCESS;
 }
 
@@ -78,14 +72,13 @@ static inline int get_remove_element_index(unsigned int index) {
 
 ssize_t dampening_driver_write(struct file *file, const char __user *user_buffer, size_t size, loff_t *offset)
 {
-	//TODO Add buffer wraparound handling
+	//TODO Fix bug in average calculations for wraparound
+	//TODO Add handling for reading over buffer end
 	int copied_data = 0;
 	int i;
 	struct dampening_driver_data* p_driver_data = container_of(file->private_data, struct dampening_driver_data, miscdevice_handle);
 	int calculation_index = p_driver_data->input_index;
 	int available_space = AVERAGING_BUFFER_SIZE - p_driver_data->input_index;
-
-	pr_info("DAMPENING_DRIVER: write called\n");
 
 	if(size == 0 || size > AVERAGING_BUFFER_SIZE)
 			return -EINVAL;
@@ -104,28 +97,10 @@ ssize_t dampening_driver_write(struct file *file, const char __user *user_buffer
 		copied_data = available_space;
 	}
 
-	pr_info("DAMPENING_DRIVER: Input buffer state: ");
-	for(i = 0; i < AVERAGING_BUFFER_SIZE; i++) {
-		pr_cont("%d,", p_driver_data->input_buffer[i]);
-	}
-	pr_cont("\n");
-	pr_info("DAMPENING_DRIVER: Output buffer state: ");
-	for(i = 0; i < AVERAGING_BUFFER_SIZE; i++) {
-		pr_cont("%d,", p_driver_data->output_buffer[i]);
-	}
-	pr_cont("\n");
-
-	pr_info("DAMPENING_DRIVER: input_index: %d\n", p_driver_data->input_index);
-	pr_info("DAMPENING_DRIVER: output_write_index: %d\n", p_driver_data->output_write_index);
-	pr_info("DAMPENING_DRIVER: output_read_index: %d\n", p_driver_data->output_read_index);
-	pr_info("DAMPENING_DRIVER: current_sum: %d\n", p_driver_data->current_sum);
-
 	//TODO Rework to for-loop to avoid possibility of eternal loops?
 	while(calculation_index != p_driver_data->input_index) {
-		pr_info("DAMPENING_DRIVER: calculation_index: %d\n", calculation_index);
 
 		if(calculation_index >= 8 || (p_driver_data->input_buffer[p_driver_data->input_index+1] != 0)) {
-			pr_info("DAMPENING_DRIVER: standard case\n");
 
 			p_driver_data->current_sum = p_driver_data->current_sum
 										 - p_driver_data->input_buffer[get_remove_element_index(calculation_index)]
@@ -143,7 +118,6 @@ ssize_t dampening_driver_write(struct file *file, const char __user *user_buffer
 				calculation_index = 0;
 
 		} else {
-			pr_info("DAMPENING_DRIVER: start case\n");
 
 			p_driver_data->current_sum += p_driver_data->input_buffer[calculation_index];
 			p_driver_data->output_buffer[p_driver_data->output_write_index] = p_driver_data->current_sum / (calculation_index+1);
@@ -160,16 +134,6 @@ ssize_t dampening_driver_write(struct file *file, const char __user *user_buffer
 		}
 	}
 
-	pr_info("DAMPENING_DRIVER: Output buffer state: ");
-	for(i = 0; i < AVERAGING_BUFFER_SIZE; i++) {
-		pr_cont("%d,", p_driver_data->output_buffer[i]);
-	}
-	pr_cont("\n");
-
-	pr_info("DAMPENING_DRIVER: input_index: %d\n", p_driver_data->input_index);
-	pr_info("DAMPENING_DRIVER: output_write_index: %d\n", p_driver_data->output_write_index);
-	pr_info("DAMPENING_DRIVER: output_read_index: %d\n", p_driver_data->output_read_index);
-
 	return copied_data;
 }
 
@@ -180,8 +144,6 @@ ssize_t dampening_driver_read(struct file *file, char __user *user_buffer, size_
 	int available_data;
 	struct dampening_driver_data* p_driver_data = container_of(file->private_data, struct dampening_driver_data, miscdevice_handle);
 
-	pr_info("DAMPENING_DRIVER: read called\n");
-
 	if(size == 0 || size > AVERAGING_BUFFER_SIZE)
 		return -EINVAL;
 
@@ -189,8 +151,6 @@ ssize_t dampening_driver_read(struct file *file, char __user *user_buffer, size_
 		available_data = p_driver_data->output_write_index - p_driver_data->output_read_index;
 	else
 		available_data = AVERAGING_BUFFER_SIZE - p_driver_data->output_read_index;
-
-	pr_info("DAMPENING_DRIVER: available_data: %d\n", available_data);
 
 	if(available_data == 0)
 		return -ENODATA;
@@ -202,10 +162,6 @@ ssize_t dampening_driver_read(struct file *file, char __user *user_buffer, size_
 
 	if(p_driver_data->output_read_index >= AVERAGING_BUFFER_SIZE)
 		p_driver_data->output_read_index = 0;
-
-	pr_info("DAMPENING_DRIVER: input_index: %d\n", p_driver_data->input_index);
-	pr_info("DAMPENING_DRIVER: output_write_index: %d\n", p_driver_data->output_write_index);
-	pr_info("DAMPENING_DRIVER: output_read_index: %d\n", p_driver_data->output_read_index);
 
 	return available_data;
 }
