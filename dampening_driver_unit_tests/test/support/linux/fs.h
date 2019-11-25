@@ -10,11 +10,15 @@
 
 #include "linux/uaccess.h"
 
-struct file { };
+struct inode {};
+typedef struct inode inode_t;
 
+struct file { };
 typedef struct file file_t;
 
 struct file_operations {
+	int (*open) (struct inode *, struct file *);
+	int (*release) (struct inode *, struct file *);
 	ssize_t (*write)(file_t *file, const char __user *user_buffer, size_t size, loff_t *offset);
 	ssize_t (*read)(file_t *file, char __user *user_buffer, size_t size, loff_t *offset);
 };

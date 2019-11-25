@@ -24,7 +24,8 @@
 
 void* data_injector();
 
-void pr_info(char*, ...);
+#define pr_info(...)
+#define pr_cont(...)
 
 
 #endif /* TEST_SUPPORT_LINUX_MODULE_H_ */

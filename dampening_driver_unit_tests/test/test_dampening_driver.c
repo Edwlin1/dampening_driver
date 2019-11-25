@@ -48,8 +48,6 @@ void test_dampening_driver_init_register_fails(void)
 	misc_register_ExpectAndReturn(DUMMY_POINTER, MISCDEVICE_ERR);
 	misc_register_IgnoreArg_device();
 
-	pr_info_Expect("DAMPENING DRIVER ERR: Could not register misc device, return code: %d\n");
-
 	TEST_ASSERT_EQUAL(MISCDEVICE_ERR, dampening_driver_init());
 }
 
@@ -128,20 +126,23 @@ void test_dampening_driver_average_eight_bytes(void)
 {
 	loff_t offset;
 	struct file test_file;
-	char input_data[1];
-	input_data[0] = 23;
+	char input_data[8] = {10, 10, 50, 100, 100, 200, 100, 1};
+	//FIXME Use a completely defined target dampening_driver_data struct instead, containing correct values for
+	//indices etc.
+	char expected_output_data[8] = {10, 10, 23, 42, 54, 78, 81, 71};
 
 	struct dampening_driver_data test_state;
 	memset(&test_state, 0, sizeof(test_state));
 	data_injector_ExpectAndReturn(&test_state);
 
-	copy_from_user_ExpectAndReturn(DUMMY_POINTER, DUMMY_POINTER, 1, COPY_USER_SUCCESS);
-	copy_from_user_IgnoreArg_from();
+	copy_from_user_ExpectAndReturn(DUMMY_POINTER, DUMMY_POINTER, sizeof(input_data), COPY_USER_SUCCESS);
 	copy_from_user_IgnoreArg_to();
+	copy_from_user_ReturnArrayThruPtr_to(input_data, sizeof(input_data));
+	copy_from_user_IgnoreArg_from();
 
 	dampening_driver_write(&test_file, input_data, sizeof(input_data), &offset);
 
-	TEST_ASSERT_EQUAL(test_state.output_buffer[0], input_data[0]);
+	TEST_ASSERT_EQUAL_INT8_ARRAY(expected_output_data, test_state.output_buffer, sizeof(expected_output_data));
 }
 
 void test_dampening_driver_average_nine_bytes(void)
